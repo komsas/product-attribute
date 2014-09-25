@@ -43,9 +43,10 @@ class product_product(orm.Model):
         }
 
     def create(self, cr, uid, vals, context=None):
-        if not 'default_code' in vals or vals['default_code'] == '/':
+        if 'default_code' not in vals or (vals['default_code'] ==
+                                          self._defaults['default_code']):
             vals['default_code'] = self.pool.get('ir.sequence').get(
-                    cr, uid, 'product.product')
+                cr, uid, 'product.product')
         return super(product_product, self).create(cr, uid, vals, context)
 
     def write(self, cr, uid, ids, vals, context=None):
@@ -53,7 +54,7 @@ class product_product(orm.Model):
             ids = [ids]
         products_without_code = self.search(
             cr, uid,
-            [('default_code', 'in', [False, '/']),
+            [('default_code', 'in', [False, self._defaults['default_code']]),
              ('id', 'in', ids)],
             context=context)
         direct_write_ids = set(ids) - set(products_without_code)
@@ -75,7 +76,7 @@ class product_product(orm.Model):
         product = self.read(cr, uid, id, ['default_code'], context=context)
         if product['default_code']:
             default.update({
-                'default_code': product['default_code'] + _('-copy'),
+                'default_code': self._defaults['default_code'],
             })
 
         return super(product_product, self).copy(cr, uid, id, default, context)
