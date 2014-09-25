@@ -20,7 +20,6 @@
 ##############################################################################
 
 from openerp.osv import orm, fields
-from openerp.tools.translate import _
 
 
 class product_product(orm.Model):
@@ -53,17 +52,17 @@ class product_product(orm.Model):
         if not hasattr(ids, '__iter__'):
             ids = [ids]
         products_without_code = self.search(
-                cr, uid,
-                [('default_code', 'in', [False, '/']),
-                 ('id', 'in', ids)],
-                context=context)
+            cr, uid,
+            [('default_code', 'in', [False, '/']),
+             ('id', 'in', ids)],
+            context=context)
         direct_write_ids = set(ids) - set(products_without_code)
         super(product_product, self).write(cr, uid,
                                            list(direct_write_ids),
                                            vals, context=context)
         for product_id in products_without_code:
             vals['default_code'] = self.pool.get('ir.sequence').get(
-                    cr, uid, 'product.product')
+                cr, uid, 'product.product')
             super(product_product, self).write(cr, uid,
                                                product_id,
                                                vals,
